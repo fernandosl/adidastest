@@ -1,0 +1,148 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+
+  <modelVersion>4.0.0</modelVersion>
+  <artifactId>subscription-model</artifactId>
+
+  <parent>
+    <artifactId>subscription-uservice</artifactId>
+    <groupId>com.adidas.test</groupId>
+    <version>0.0.1</version>
+  </parent>
+
+  <dependencies>
+    <dependency>
+      <groupId>org.apache.commons</groupId>
+      <artifactId>commons-lang3</artifactId>
+      <version>${commons.lang.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.hibernate</groupId>
+      <artifactId>hibernate-tools</artifactId>
+      <version>${hibernate.tools.version}</version>
+      <scope>provided</scope>
+    </dependency>
+    <dependency>
+      <groupId>com.querydsl</groupId>
+      <artifactId>querydsl-apt</artifactId>
+      <version>${querydsl.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>com.querydsl</groupId>
+      <artifactId>querydsl-jpa</artifactId>
+      <version>${querydsl.version}</version>
+    </dependency>
+  </dependencies>
+
+  <profiles>
+    <profile>
+      <id>JPA_GEN</id>
+      <build>
+        <plugins>
+          <!-- compiles revengstrategy class, needed to execute reveng plugin -->
+          <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-compiler-plugin</artifactId>
+            <executions>
+              <execution>
+                <id>pre-compilation</id>
+                <phase>initialize</phase>
+                <goals>
+                  <goal>compile</goal>
+                </goals>
+                <configuration>
+                  <source>${java.version}</source>
+                  <target>${java.version}</target>
+                  <encoding>UTF-8</encoding>
+                  <includes>
+                    <include>com/adidas/test/${project.package}/strategy/*.java</include>
+                  </includes>
+                </configuration>
+              </execution>
+            </executions>
+          </plugin>
+          <!-- Generate JPA Entities -->
+          <plugin>
+            <groupId>org.codehaus.mojo</groupId>
+            <artifactId>hibernate3-maven-plugin</artifactId>
+            <version>2.2</version>
+            <executions>
+              <execution>
+                <id>${project.package}-db</id>
+                <phase>generate-sources</phase>
+                <goals>
+                  <goal>hbm2java</goal>
+                </goals>
+                <configuration>
+                  <components>
+                    <component>
+                      <name>hbm2java</name>
+                      <outputDirectory>target/generated-entities</outputDirectory>
+                      <implementation>jdbcconfiguration</implementation>
+                    </component>
+                  </components>
+                  <componentProperties>
+                    <!--Reverse Engine using hbm2java:
+                        ejb3 give us annotated classes -->
+                    <reversestrategy>com.adidas.test.${project.package}.strategy.RevengStrategy
+                    </reversestrategy>
+                    <revengfile>/src/main/resources/config/persistence/reveng.xml</revengfile>
+                    <propertyfile>/src/main/resources/config/persistence/hibernate.properties
+                    </propertyfile>
+                    <packagename>com.adidas.test.${project.package}.domain.entity</packagename>
+                    <jdk5>true</jdk5>
+                    <ejb3>true</ejb3>
+                    <format>true</format>
+                  </componentProperties>
+                </configuration>
+              </execution>
+            </executions>
+            <dependencies>
+              <!--Dependencies for the db jdbc driver -->
+              <!--<dependency>
+                <groupId>com.oracle</groupId>
+                <artifactId>ojdbc6</artifactId>
+                <version>11.2.0.3</version>
+              </dependency>-->
+              <dependency>
+                <groupId>com.h2database</groupId>
+                <artifactId>h2</artifactId>
+                <scope>runtime</scope>
+              </dependency>
+              <dependency>
+                <groupId>cglib</groupId>
+                <artifactId>cglib-nodep</artifactId>
+                <version>2.1_3</version>
+              </dependency>
+            </dependencies>
+          </plugin>
+        </plugins>
+      </build>
+    </profile>
+  </profiles>
+
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>com.mysema.maven</groupId>
+        <artifactId>apt-maven-plugin</artifactId>
+        <version>1.1.3</version>
+        <executions>
+          <execution>
+            <phase>generate-sources</phase>
+            <goals>
+              <goal>process</goal>
+            </goals>
+            <configuration>
+              <outputDirectory>target/generated-sources/java</outputDirectory>
+              <processor>com.querydsl.apt.jpa.JPAAnnotationProcessor</processor>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+    </plugins>
+  </build>
+
+</project>
