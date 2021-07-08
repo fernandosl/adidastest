@@ -180,11 +180,11 @@ public class SubscriptionClientServiceImpl implements SubscriptionClientService 
 
     String s = uriComponentsBuilder.buildAndExpand().toUriString();
 
-    List<SubscriptionDTO> subscriptionDTOList = new ArrayList<>();
-
     ResponseEntity<List<SubscriptionDTO>> respEntity = restTemplate
         .exchange(uriComponentsBuilder.toUriString(), HttpMethod.POST, entity,
             new ParameterizedTypeReference<List<SubscriptionDTO>>() {});
+
+    List<SubscriptionDTO> subscriptionDTOList = respEntity.getBody();
     int totalRegisters = 0;
     try {
       HttpHeaders responseHeaders = respEntity.getHeaders();
