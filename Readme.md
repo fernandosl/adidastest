@@ -25,6 +25,8 @@ It will build the three independent subprojects ordering the modules for resolvi
 
 The projects are Spring Boot applications wich can be indepently run from command line. After a successful building from root project directory independent applications can be run from command line:
 
+### Running from command line
+
 ```
 cd public-service
 java -jar pubservice-webcontroller/target/pubservice-uservice.jar
@@ -37,6 +39,25 @@ java -jar subscription-webcontroller/target/subscription-uservice.jar
 cd email-service
 java -jar email-webcontroller/target/email-uservice.jar
 ```
+
+### Running from maven
+
+```
+cd public-service/pubservice-webcontroller
+mvn spring-boot:run
+```
+```
+cd subscription-service/subscription-service
+mvn spring-boot:run
+```
+```
+cd email-service/email-webcontroller
+mvn spring-boot:run
+```
+
+### Running from Dockers
+
+Each project has a Docker configuration
 
 ## Accesing the services
 
