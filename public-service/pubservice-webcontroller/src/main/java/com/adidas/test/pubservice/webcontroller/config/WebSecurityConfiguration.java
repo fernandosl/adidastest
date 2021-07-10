@@ -37,6 +37,7 @@ public class WebSecurityConfiguration extends WebSecurityConfigurerAdapter {
         //.expressionHandler(new CustomWebSecurityExpressionHandler())
         .antMatchers(
             ApplicationConstants.API_VERSION + "/authentication/*",
+            "/actuator/**",
             "/v3/api-docs",
             "/configuration/ui",
             "/swagger-resources/**",

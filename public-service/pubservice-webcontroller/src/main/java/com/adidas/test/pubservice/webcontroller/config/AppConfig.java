@@ -1,6 +1,7 @@
 package com.adidas.test.pubservice.webcontroller.config;
 
 import com.adidas.test.pubservice.common.web.util.CustomRequestLoggingFilter;
+import com.adidas.test.pubservice.common.web.util.RestTemplateHeaderModifierInterceptor;
 import java.util.ArrayList;
 import java.util.List;
 import org.slf4j.Logger;
@@ -27,7 +28,7 @@ public class AppConfig {
   public RestTemplate restTemplate() {
     LOG.info(" --- CONFIGURING REST TEMPLATE ---");
     RestTemplate restTemplate = new RestTemplate();
-    /*try {
+    try {
       List<ClientHttpRequestInterceptor> interceptors
           = restTemplate.getInterceptors();
       if (CollectionUtils.isEmpty(interceptors)) {
@@ -38,7 +39,7 @@ public class AppConfig {
     } catch (Exception e) {
       e.printStackTrace();
       LOG.error("Error configuring restTemplate", e);
-    }*/
+    }
     return restTemplate;
   }
 

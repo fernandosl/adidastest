@@ -1,6 +1,6 @@
 package com.adidas.test.pubservice.domain.service;
 
-import com.adidas.test.pubservice.domain.dto.SubscriptionDTO;
+import com.adidas.test.subscription.domain.dto.SubscriptionDTO;
 import org.springframework.data.domain.Page;
 
 public interface SubscriptionClientService {

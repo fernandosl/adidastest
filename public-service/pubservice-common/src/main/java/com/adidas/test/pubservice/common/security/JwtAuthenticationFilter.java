@@ -29,8 +29,8 @@ import org.springframework.web.filter.OncePerRequestFilter;
 
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
-  private final String HEADER_STRING = "jwttoken";
-  private final String TOKEN_PREFIX = "Bearer ";
+  public static final String HEADER_STRING = "jwttoken";
+  public static final String TOKEN_PREFIX = "Bearer ";
 
   @Autowired
   private Environment environment;

@@ -144,4 +144,13 @@ public class SubscriptionEntity {
   public void setSendEmailId(Long sendEmailId) {
     this.sendEmailId = sendEmailId;
   }
+
+  public Date getCancelDate() {
+    return cancelDate;
+  }
+
+  public void setCancelDate(Date cancelDate) {
+    this.cancelDate = cancelDate;
+  }
+
 }

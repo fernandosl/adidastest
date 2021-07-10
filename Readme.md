@@ -57,7 +57,24 @@ mvn spring-boot:run
 
 ### Running from Dockers
 
-Each project has a Docker configuration
+Each project has a Docker configuration, please configure application-docker.properties in each service with the proper values.
+Following is a list with the commands for building and running docker images, take into account that for final configuration the 'docker' profile must be selected:
+
+From public-service directory, using internal configured 8080 port:
+```
+docker build -t publicservice-app .
+docker run -p 8080:8080 -e "SPRING_PROFILES_ACTIVE=docker" publicservice-app
+```
+From subscription-service directory, using internal configured 8081 port:
+```
+docker build -t subscriptionservice-app .
+docker run -p 8081:8081 -e "SPRING_PROFILES_ACTIVE=docker" subscriptionservice-app
+```
+From email-service directory, using internal configured 8082 port:
+```
+docker build -t emailservice-app .
+docker run -p 8082:8082 -e "SPRING_PROFILES_ACTIVE=docker" emailservice-app
+```
 
 ## Accesing the services
 
@@ -67,6 +84,7 @@ Default configuration in application.properties for the services exposes these a
 public-uservice
 url.........: http://localhost:8080
 swagger.....: http://localhost:8080/swagger-ui/
+actuator....: http://localhost:8080/actuator/
 
 subscription-uservice
 url.........: http://localhost:8081
@@ -98,6 +116,7 @@ This call will return a json object with two elemenst:
 * "user": details of the autenticated user
 
 The token must be added to the header to autenthicate subsequent calls. The header name is jwttoken and its value must be the word Bearer followed by one space and then the token.
+The container RestTemplate injects the token if it has not been already added to the request.
 
 Example
 ```
@@ -147,6 +166,26 @@ user......: sa
 password..: password
 jdbcurl...: jdbc:h2:file:D:/storage/h2-data/testservice
 ```
+
+Note that jdbc url for windows systems requires unit letter.
+
+## Entities and validations
+
+Subscription service uses SubscriptionDTO for inserting a new Subscription:
+- Id must be null, it will be autoassigned on insertion.
+- Email must be valid.
+- Name is mandatory.
+- Gender is a String (MALE/FEMALE...)
+- Consent flat is one char: 1 consent 0 no consent
+
+The service returns the inserted register with the id informed.
+
+For querying and individual subscription the service requires the id of the subscription. Returns the json with the recovered object, 204 no content if not found.
+
+Cancel a subscription requires the id of the register, returns true or false depending if it has been cancelled. Cancel is stored as a timestamp in cancelDate field.
+
+Subscription list service can be paginated, supply page and number of rows per page to be returned. Reply includes x-total-count header with the total number of registers of the query. Filter parameters can be added to query passed in the same SubscriptionDTO object.
+
 
 ## License
 Not needed

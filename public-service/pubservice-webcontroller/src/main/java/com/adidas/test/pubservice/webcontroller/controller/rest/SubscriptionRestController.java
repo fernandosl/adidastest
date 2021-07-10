@@ -3,9 +3,9 @@ package com.adidas.test.pubservice.webcontroller.controller.rest;
 import com.adidas.test.pubservice.common.error.ApplicationException;
 import com.adidas.test.pubservice.common.model.security.AuthUser;
 import com.adidas.test.pubservice.common.web.controller.BaseRestController;
-import com.adidas.test.pubservice.domain.dto.SubscriptionDTO;
 import com.adidas.test.pubservice.domain.service.SubscriptionClientService;
 import com.adidas.test.pubservice.webcontroller.util.ApplicationConstants;
+import com.adidas.test.subscription.domain.dto.SubscriptionDTO;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import java.util.List;
@@ -14,7 +14,6 @@ import javax.validation.Valid;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -172,7 +171,8 @@ public class SubscriptionRestController extends BaseRestController {
     if (subscriptionDTOPage != null && subscriptionDTOPage.getNumberOfElements() > 0) {
       HttpHeaders responseHeaders = new HttpHeaders();
       responseHeaders
-          .set(ApplicationConstants.HEADER_TOTAL_COUNT, Long.toString(subscriptionDTOPage.getTotalElements()));
+          .set(ApplicationConstants.HEADER_TOTAL_COUNT,
+              Long.toString(subscriptionDTOPage.getTotalElements()));
 
       return new ResponseEntity<>(subscriptionDTOPage.getContent(), responseHeaders, HttpStatus.OK);
     } else {

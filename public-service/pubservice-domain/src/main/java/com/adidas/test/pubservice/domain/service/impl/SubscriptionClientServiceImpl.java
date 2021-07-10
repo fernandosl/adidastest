@@ -1,9 +1,12 @@
 package com.adidas.test.pubservice.domain.service.impl;
 
 import com.adidas.test.pubservice.common.web.util.WebControllerUtils;
-import com.adidas.test.pubservice.domain.dto.SubscriptionDTO;
 import com.adidas.test.pubservice.domain.service.SubscriptionClientService;
-import java.util.ArrayList;
+import com.adidas.test.subscription.domain.dto.SubscriptionDTO;
+import io.github.resilience4j.bulkhead.annotation.Bulkhead;
+import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
+import io.github.resilience4j.retry.annotation.Retry;
+import io.github.resilience4j.timelimiter.annotation.TimeLimiter;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -14,7 +17,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -32,6 +34,8 @@ public class SubscriptionClientServiceImpl implements SubscriptionClientService 
 
   @Value(value = "${subscription.service.host}")
   private String subscriptionServiceURL;
+
+  private final static String SUBSCRIPTION_BACKEND = "subscriptionBackend";
 
   private static final String ACTION_CANCEL_SUBSCRIPTION = "subscription/cancel/{subscriptionId}";
   private static final String ACTION_CREATE_SUBSCRIPTION = "subscription/create";
@@ -69,6 +73,10 @@ public class SubscriptionClientServiceImpl implements SubscriptionClientService 
    * @param bearer
    * @return
    */
+  @CircuitBreaker(name = SUBSCRIPTION_BACKEND)
+  @Bulkhead(name = SUBSCRIPTION_BACKEND)
+  @Retry(name = SUBSCRIPTION_BACKEND)
+  @TimeLimiter(name = SUBSCRIPTION_BACKEND)
   @Override
   public Boolean cancelSubscriptionById(Long subscriptionId, String bearer) {
     HttpHeaders headers = createDefaultHeaders(bearer);
@@ -101,11 +109,15 @@ public class SubscriptionClientServiceImpl implements SubscriptionClientService 
    * @param bearer
    * @return
    */
+  @CircuitBreaker(name = SUBSCRIPTION_BACKEND)
+  @Bulkhead(name = SUBSCRIPTION_BACKEND)
+  @Retry(name = SUBSCRIPTION_BACKEND)
+  @TimeLimiter(name = SUBSCRIPTION_BACKEND)
   @Override
   public SubscriptionDTO createSubscription(SubscriptionDTO subscriptionDTO, String bearer) {
     HttpHeaders headers = createDefaultHeaders(bearer);
 
-    HttpEntity<String> entity = new HttpEntity<String>("parameters", headers);
+    HttpEntity<SubscriptionDTO> entity = new HttpEntity<>(subscriptionDTO, headers);
 
     UriComponentsBuilder uriComponentsBuilder = UriComponentsBuilder
         .fromHttpUrl(subscriptionServiceURL)
@@ -126,6 +138,10 @@ public class SubscriptionClientServiceImpl implements SubscriptionClientService 
    * @param bearer
    * @return
    */
+  @CircuitBreaker(name = SUBSCRIPTION_BACKEND)
+  @Bulkhead(name = SUBSCRIPTION_BACKEND)
+  @Retry(name = SUBSCRIPTION_BACKEND)
+  @TimeLimiter(name = SUBSCRIPTION_BACKEND)
   @Override
   public SubscriptionDTO getSubscriptionById(Long subscriptionId, String bearer) {
     HttpHeaders headers = createDefaultHeaders(bearer);
@@ -151,6 +167,10 @@ public class SubscriptionClientServiceImpl implements SubscriptionClientService 
     return subscriptionDTO;
   }
 
+  @CircuitBreaker(name = SUBSCRIPTION_BACKEND)
+  @Bulkhead(name = SUBSCRIPTION_BACKEND)
+  @Retry(name = SUBSCRIPTION_BACKEND)
+  @TimeLimiter(name = SUBSCRIPTION_BACKEND)
   @Override
   public Page<SubscriptionDTO> listSubscriptions(SubscriptionDTO subscriptionDTO, String _page,
       String _rows, String _sort, String _direction, String bearer) {
@@ -182,7 +202,8 @@ public class SubscriptionClientServiceImpl implements SubscriptionClientService 
 
     ResponseEntity<List<SubscriptionDTO>> respEntity = restTemplate
         .exchange(uriComponentsBuilder.toUriString(), HttpMethod.POST, entity,
-            new ParameterizedTypeReference<List<SubscriptionDTO>>() {});
+            new ParameterizedTypeReference<List<SubscriptionDTO>>() {
+            });
 
     List<SubscriptionDTO> subscriptionDTOList = respEntity.getBody();
     int totalRegisters = 0;
@@ -192,11 +213,9 @@ public class SubscriptionClientServiceImpl implements SubscriptionClientService 
       if (totalCountH != null && totalCountH.size() > 0) {
         totalRegisters = Integer.parseInt(totalCountH.get(0));
       }
-    }
-    catch(Exception e) {
+    } catch (Exception e) {
       totalRegisters = subscriptionDTOList.size();
     }
-
 
     Pageable pageable = WebControllerUtils.parsePageParams(_rows, _page, _sort, _direction);
     PageImpl<SubscriptionDTO> subscriptionDTOPage = new PageImpl<>(subscriptionDTOList, pageable,

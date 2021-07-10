@@ -30,6 +30,8 @@ public class SubscriptionDTO implements Serializable {
   @NotNull(message = "Birth Date must be provided")
   private java.util.Date birthDate;
 
+  private java.util.Date cancelDate;
+
   @NotNull(message = "Consent must be accepted")
   private String consentFlag;
 

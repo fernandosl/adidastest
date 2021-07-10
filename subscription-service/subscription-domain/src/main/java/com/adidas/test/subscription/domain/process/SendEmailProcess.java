@@ -5,6 +5,8 @@ import com.adidas.test.email.model.dto.EmailDTO;
 import com.adidas.test.pubservice.common.model.security.TokenUser;
 import com.adidas.test.pubservice.common.security.JWTUtils;
 import com.adidas.test.subscription.domain.service.SubscriptionService;
+import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
+import io.github.resilience4j.timelimiter.annotation.TimeLimiter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -29,6 +31,8 @@ public class SendEmailProcess {
 
   private static final String ACTION_SEND_EMAIL = "/email/send";
 
+  private final static String EMAIL_BACKEND = "emailBackend";
+
   @Value(value = "${email.service.host}")
   private String emailServiceUrl;
 
@@ -52,11 +56,10 @@ public class SendEmailProcess {
     EmailDTO emailDTOResponse = null;
     try {
       emailDTOResponse = sendEmail(emailDTO, bearer);
-    }
-    catch(Exception e) {
+    } catch (Exception e) {
       LOG.error("Exception during email sending to " + emailDTO.getEmail(), e);
     }
-    if(emailDTOResponse != null && emailDTOResponse.getSendDate() != null) {
+    if (emailDTOResponse != null && emailDTOResponse.getSendDate() != null) {
       LOG.info("Email Sent!");
     } else {
       LOG.info("Email Failed!");
@@ -68,7 +71,7 @@ public class SendEmailProcess {
     user.setUsername("SendEmailProcess");
     List<String> permissions = new ArrayList();
     permissions.add("ROLE_EMAIL_SEND_MESSAGE");
-    user.setPermissions((String[])permissions.toArray(new String[0]));
+    user.setPermissions((String[]) permissions.toArray(new String[0]));
     return JWTUtils.codeToken(user);
   }
 
@@ -81,6 +84,8 @@ public class SendEmailProcess {
     return emailDTO;
   }
 
+  @CircuitBreaker(name = EMAIL_BACKEND)
+  @TimeLimiter(name = EMAIL_BACKEND)
   public EmailDTO sendEmail(EmailDTO emailDTO, String bearer) {
     HttpHeaders headers = createDefaultHeaders(bearer);
 
